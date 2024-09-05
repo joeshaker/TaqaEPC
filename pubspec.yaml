@@ -38,6 +38,8 @@ dependencies:
   dio: ^5.6.0
   flutter_bloc: ^8.1.6
   auto_size_text: ^3.0.0
+  flutter_form_builder: ^9.4.1
+  dropdown_button2: ^2.3.9
 
 dev_dependencies:
   flutter_test:

@@ -1,3 +1,4 @@
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:taqa_epc/Shared/Component/Components.dart';
 import 'package:taqa_epc/Shared/Constant/Colors/Color.dart';
@@ -11,12 +12,19 @@ class ServiceScreen extends StatefulWidget {
 }
 
 class _ServiceScreenState extends State<ServiceScreen> {
-  final searchController = TextEditingController();
-  final formKey = GlobalKey<FormState>();
-  Set<String> selectedAreas = {};
-  Set<String> selectedBranches = {};
-  Set<String> selectedServices = {};
-  String searchQuery = '';
+  String? selectedArea;
+  String? selectedBranch;
+
+  final TextEditingController areaSearchController = TextEditingController();
+  final TextEditingController branchSearchController = TextEditingController();
+
+  @override
+  void dispose() {
+    areaSearchController.dispose();
+    branchSearchController.dispose();
+    super.dispose();
+  }
+
   List<Map<String, dynamic>> services = [
     {"name": "Service 1", "area": "Area 1", "branch": "Branch 1", "date": DateTime.now(), "address": "Address 1"},
     {"name": "Service 1", "area": "Area 1", "branch": "Branch 2", "date": DateTime.now(), "address": "Address 2"},
@@ -29,19 +37,38 @@ class _ServiceScreenState extends State<ServiceScreen> {
     {"name": "Service 3", "area": "Area 1", "branch": "Branch 1", "date": DateTime.now(), "address": "Address 3"},
   ];
 
-  List<Map<String, dynamic>> get filteredData {
+  List<String> areas = ['Area 1', 'Area 2', 'Area 3'];
+  List<String> branches = ['Branch 1', 'Branch 2', 'Branch 3'];
+
+  List<Map<String, dynamic>> get filteredServices {
     return services.where((service) {
-      bool matchArea = selectedAreas.isEmpty || selectedAreas.contains(service['area']);
-      bool matchBranch = selectedBranches.isEmpty || selectedBranches.contains(service['branch']);
-      bool matchService = selectedServices.isEmpty || selectedServices.contains(service['name']);
-
-      bool matchSearch = service['name']!.toLowerCase().contains(searchQuery.toLowerCase()) ||
-          service['area']!.toLowerCase().contains(searchQuery.toLowerCase()) ||
-          service['branch']!.toLowerCase().contains(searchQuery.toLowerCase()) ||
-          service['address']!.toLowerCase().contains(searchQuery.toLowerCase());
-
-      return matchArea && matchBranch && matchService && matchSearch;
+      bool matchArea = selectedArea == null || service['area'] == selectedArea;
+      bool matchBranch = selectedBranch == null || service['branch'] == selectedBranch;
+      return matchArea && matchBranch;
     }).toList();
+  }
+
+  void clearFilters() {
+    setState(() {
+      selectedArea = null;
+      selectedBranch = null;
+      areaSearchController.clear();
+      branchSearchController.clear();
+    });
+  }
+
+  void clearAreaFilter() {
+    setState(() {
+      selectedArea = null;
+      areaSearchController.clear();
+    });
+  }
+
+  void clearBranchFilter() {
+    setState(() {
+      selectedBranch = null;
+      branchSearchController.clear();
+    });
   }
 
   @override
@@ -74,230 +101,240 @@ class _ServiceScreenState extends State<ServiceScreen> {
             elevation: 0,
           ),
           backgroundColor: Colors.transparent,
-          body: Form(
-            key: formKey,
-            child: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Column(
-                children: [
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20),
-                            color: Colors.grey,
-                          ),
-                          width: MediaQuery.of(context).size.width * 0.2,
-                          height: MediaQuery.of(context).size.height * 0.04,
-                          child: Center(child: Text("Search by")),
-                        ),
-                        SizedBox(width: MediaQuery.of(context).size.width * 0.05),
-                        Column(
-                          children: [
-                            Row(
-                              children: [
-                                CustomCheckbox(
-                                  label: "Area 1",
-                                  isChecked: selectedAreas.contains("Area 1"),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      if (value!) {
-                                        selectedAreas.add("Area 1");
-                                      } else {
-                                        selectedAreas.remove("Area 1");
-                                      }
-                                    });
-                                  },
-                                ),
-                                SizedBox(width: MediaQuery.of(context).size.width * 0.05),
-                                CustomCheckbox(
-                                  label: "Branch 1",
-                                  isChecked: selectedBranches.contains("Branch 1"),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      if (value!) {
-                                        selectedBranches.add("Branch 1");
-                                      } else {
-                                        selectedBranches.remove("Branch 1");
-                                      }
-                                    });
-                                  },
-                                ),
-                                SizedBox(width: MediaQuery.of(context).size.width * 0.05),
-                                CustomCheckbox(
-                                  label: "Service 1",
-                                  isChecked: selectedServices.contains("Service 1"),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      if (value!) {
-                                        selectedServices.add("Service 1");
-                                      } else {
-                                        selectedServices.remove("Service 1");
-                                      }
-                                    });
-                                  },
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 6),
-                            Row(
-                              children: [
-                                CustomCheckbox(
-                                  label: "Area 2",
-                                  isChecked: selectedAreas.contains("Area 2"),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      if (value!) {
-                                        selectedAreas.add("Area 2");
-                                      } else {
-                                        selectedAreas.remove("Area 2");
-                                      }
-                                    });
-                                  },
-                                ),
-                                SizedBox(width: MediaQuery.of(context).size.width * 0.05),
-                                CustomCheckbox(
-                                  label: "Branch 2",
-                                  isChecked: selectedBranches.contains("Branch 2"),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      if (value!) {
-                                        selectedBranches.add("Branch 2");
-                                      } else {
-                                        selectedBranches.remove("Branch 2");
-                                      }
-                                    });
-                                  },
-                                ),
-                                SizedBox(width: MediaQuery.of(context).size.width * 0.05),
-                                CustomCheckbox(
-                                  label: "Service 2",
-                                  isChecked: selectedServices.contains("Service 2"),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      if (value!) {
-                                        selectedServices.add("Service 2");
-                                      } else {
-                                        selectedServices.remove("Service 2");
-                                      }
-                                    });
-                                  },
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 6),
-                            Row(
-                              children: [
-                                CustomCheckbox(
-                                  label: "Area 3",
-                                  isChecked: selectedAreas.contains("Area 3"),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      if (value!) {
-                                        selectedAreas.add("Area 3");
-                                      } else {
-                                        selectedAreas.remove("Area 3");
-                                      }
-                                    });
-                                  },
-                                ),
-                                SizedBox(width: MediaQuery.of(context).size.width * 0.05),
-                                CustomCheckbox(
-                                  label: "Branch 3",
-                                  isChecked: selectedBranches.contains("Branch 3"),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      if (value!) {
-                                        selectedBranches.add("Branch 3");
-                                      } else {
-                                        selectedBranches.remove("Branch 3");
-                                      }
-                                    });
-                                  },
-                                ),
-                                SizedBox(width: MediaQuery.of(context).size.width * 0.05),
-                                CustomCheckbox(
-                                  label: "Service 3",
-                                  isChecked: selectedServices.contains("Service 3"),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      if (value!) {
-                                        selectedServices.add("Service 3");
-                                      } else {
-                                        selectedServices.remove("Service 3");
-                                      }
-                                    });
-                                  },
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.9,
-                    child: defaultTextFormDecorated(
-                      hintColor: Colors.black,
-                      labelColor: Colors.black,
-                      controller: searchController,
-                      label: "Search",
-                      hintText: "Enter search term",
-                      type: TextInputType.text,
-                      onSubmit: (value) {
-                        if (formKey.currentState!.validate()) {
-                          setState(() {
-                            searchQuery = value ?? '';
-                          });
-                        }
-                      },
-                      validate: (value) {
-                        if (value!.isEmpty) {
-                          return "Search field should not be empty";
-                        }
-                        return null;
-                      },
-                      onChange: (value) {
-                        setState(() {
-                          searchQuery = value;
-                        });
-                      },
-                      suffixPressed: () {
-                        if (formKey.currentState!.validate()) {
-                          print("Form is valid");
-                        }
-                      },
-                      suffixicon: Icons.search,
-                      prefixicon: Icons.menu,
-                      fillColor: color2,
-                      borderRadius: 30,
-                      // Customize border radius
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  Expanded(
-                    child: Container(
-                      width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.height,
-                      child: InkWell(
-                        onTap: (){
-                          Navigator.push(context,MaterialPageRoute(builder: (context)=>ServiceDetail()));
-                        },
-                        child: ListView.separated(
-                          physics: BouncingScrollPhysics(),
-                          itemBuilder: (context, index) => buildContainerService(context, filteredData[index]),
-                          itemCount: filteredData.length,
-                          separatorBuilder: (context, index) => SizedBox(height: 20),
-                        ),
+          body: Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Column(
+              children: [
+                // Area Dropdown
+                DropdownButtonHideUnderline(
+                  child: DropdownButton2<String>(
+                    isExpanded: true,
+                    hint: Text(
+                      'Select Area',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Theme.of(context).hintColor,
                       ),
                     ),
+                    items: [
+                      DropdownMenuItem<String>(
+                        value: null,
+                        child: Row(
+                          children: [
+                            Icon(Icons.cleaning_services_rounded, color: Colors.black),
+                            SizedBox(width: 8),
+                          ],
+                        ),
+                        onTap: clearAreaFilter,
+                      ),
+                      ...areas
+                          .where((area) => area.toLowerCase().contains(areaSearchController.text.toLowerCase()))
+                          .map((item) => DropdownMenuItem<String>(
+                        value: item,
+                        child: Text(
+                          item,
+                          style: const TextStyle(
+                            fontSize: 14,
+                          ),
+                        ),
+                      ))
+                          .toList(),
+                    ],
+                    value: selectedArea,
+                    onChanged: (value) {
+                      setState(() {
+                        selectedArea = value;
+                      });
+                    },
+                    buttonStyleData: ButtonStyleData(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      height: MediaQuery.of(context).size.height * 0.05,
+                      width: MediaQuery.of(context).size.width * 0.5,
+                      decoration: BoxDecoration(
+                        color: color2,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    dropdownStyleData: const DropdownStyleData(
+                      maxHeight: 200,
+                    ),
+                    menuItemStyleData: const MenuItemStyleData(
+                      height: 40,
+                    ),
+                    dropdownSearchData: DropdownSearchData(
+                      searchController: areaSearchController,
+                      searchInnerWidgetHeight: 50,
+                      searchInnerWidget: Container(
+                        height: 50,
+                        padding: const EdgeInsets.only(
+                          top: 8,
+                          bottom: 4,
+                          right: 8,
+                          left: 8,
+                        ),
+                        child: TextFormField(
+                          expands: true,
+                          maxLines: null,
+                          controller: areaSearchController,
+                          decoration: InputDecoration(
+                            isDense: true,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 8,
+                            ),
+                            hintText: 'Search for an area...',
+                            hintStyle: const TextStyle(fontSize: 12),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                      ),
+                      searchMatchFn: (item, searchValue) {
+                        return item.value.toString().toLowerCase().contains(searchValue.toLowerCase());
+                      },
+                    ),
+                    onMenuStateChange: (isOpen) {
+                      if (!isOpen) {
+                        areaSearchController.clear();
+                      }
+                    },
                   ),
-                ],
-              ),
+                ),
+                SizedBox(height: 10),
+                // Branch Dropdown
+                DropdownButtonHideUnderline(
+                  child: DropdownButton2<String>(
+                    isExpanded: true,
+                    hint: Text(
+                      'Select Branch',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Theme.of(context).hintColor,
+                      ),
+                    ),
+                    items: [
+                      DropdownMenuItem<String>(
+                        value: null,
+                        child: Row(
+                          children: [
+                            Icon(Icons.cleaning_services_rounded, color: Colors.black),
+                            SizedBox(width: 8),
+                          ],
+                        ),
+                        onTap: clearBranchFilter,
+                      ),
+                      ...branches
+                          .where((branch) => branch.toLowerCase().contains(branchSearchController.text.toLowerCase()))
+                          .map((item) => DropdownMenuItem<String>(
+                        value: item,
+                        child: Text(
+                          item,
+                          style: const TextStyle(
+                            fontSize: 14,
+                          ),
+                        ),
+                      ))
+                          .toList(),
+                    ],
+                    value: selectedBranch,
+                    onChanged: (value) {
+                      setState(() {
+                        selectedBranch = value;
+                      });
+                    },
+                    buttonStyleData: ButtonStyleData(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      height: MediaQuery.of(context).size.height * 0.05,
+                      width: MediaQuery.of(context).size.width * 0.5,
+                      decoration: BoxDecoration(
+                        color: color2,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    dropdownStyleData: const DropdownStyleData(
+                      maxHeight: 200,
+                    ),
+                    menuItemStyleData: const MenuItemStyleData(
+                      height: 40,
+                    ),
+                    dropdownSearchData: DropdownSearchData(
+                      searchController: branchSearchController,
+                      searchInnerWidgetHeight: 50,
+                      searchInnerWidget: Container(
+                        height: 50,
+                        padding: const EdgeInsets.only(
+                          top: 8,
+                          bottom: 4,
+                          right: 8,
+                          left: 8,
+                        ),
+                        child: TextFormField(
+                          expands: true,
+                          maxLines: null,
+                          controller: branchSearchController,
+                          decoration: InputDecoration(
+                            isDense: true,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 8,
+                            ),
+                            hintText: 'Search for a branch...',
+                            hintStyle: const TextStyle(fontSize: 12),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                      ),
+                      searchMatchFn: (item, searchValue) {
+                        return item.value.toString().toLowerCase().contains(searchValue.toLowerCase());
+                      },
+                    ),
+                    onMenuStateChange: (isOpen) {
+                      if (!isOpen) {
+                        branchSearchController.clear();
+                      }
+                    },
+                  ),
+                ),
+                SizedBox(height: 10),
+                // Buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: clearFilters,
+                      child: Text('Clear All Filters'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red, // Change this to your desired color
+                        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        textStyle: TextStyle(fontSize: 14),
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    // ElevatedButton(
+                    //   onPressed: submitFilters,
+                    //   child: Text('Apply Filters'),
+                    //   style: ElevatedButton.styleFrom(
+                    //     backgroundColor: Colors.blue, // Change this to your desired color
+                    //     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    //     textStyle: TextStyle(fontSize: 14),
+                    //   ),
+                    // ),
+                  ],
+                ),
+                SizedBox(height: 10),
+                Expanded(
+                  child: ListView.separated(
+                    physics: BouncingScrollPhysics(),
+                    itemBuilder: (context, index) => buildContainerService(
+                        context, filteredServices[index]),
+                    itemCount: filteredServices.length,
+                    separatorBuilder: (context, index) => SizedBox(height: 20),
+                  ),
+                ),
+              ],
             ),
           ),
         ),

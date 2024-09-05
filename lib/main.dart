@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:taqa_epc/modules/Login/LoginScreen.dart';
+import 'package:taqa_epc/modules/ServiceDetails/ServiceDetail.dart';
 import 'package:taqa_epc/modules/Services/Services.dart';
 
 void main() {
@@ -34,7 +35,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: ServiceScreen(),
+      home: LoginScreen(),
     );
   }
 }
