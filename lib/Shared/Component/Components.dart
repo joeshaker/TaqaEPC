@@ -86,12 +86,13 @@ Widget defaultTextFormDecorated({
   required ValueChanged<String> onChange,
   required VoidCallback suffixPressed,
   required IconData suffixicon,
+  required VoidCallback prefixPressed, // New callback for prefix icon
   IconData? prefixicon,
-  Color? borderColor, // Border color
-  double? borderRadius, // Border radius
-  Color? fillColor, // Fill color
-  Color? hintColor, // Hint text color
-  Color? labelColor, // Label text color
+  Color? borderColor,
+  double? borderRadius,
+  Color? fillColor,
+  Color? hintColor,
+  Color? labelColor,
 }) {
   return TextFormField(
     controller: controller,
@@ -103,11 +104,16 @@ Widget defaultTextFormDecorated({
         icon: Icon(suffixicon),
         onPressed: suffixPressed,
       ),
-      prefixIcon: prefixicon != null ? Icon(prefixicon) : null,
-      filled: true, // Enable filled background
-      fillColor: fillColor ?? Colors.white, // Set the fill color, default to white if not provided
-      hintStyle: TextStyle(color: hintColor ?? Colors.grey), // Customize hint text color
-      labelStyle: TextStyle(color: labelColor ?? Colors.black), // Customize label text color
+      prefixIcon: prefixicon != null
+          ? IconButton(
+        icon: Icon(prefixicon),
+        onPressed: prefixPressed, // Trigger dropdown menu
+      )
+          : null,
+      filled: true,
+      fillColor: fillColor ?? Colors.white,
+      hintStyle: TextStyle(color: hintColor ?? Colors.grey),
+      labelStyle: TextStyle(color: labelColor ?? Colors.black),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(borderRadius ?? 10.0),
         borderSide: BorderSide(color: borderColor ?? Colors.grey),

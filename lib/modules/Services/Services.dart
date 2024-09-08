@@ -1,4 +1,3 @@
-import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:taqa_epc/Shared/Component/Components.dart';
 import 'package:taqa_epc/Shared/Constant/Colors/Color.dart';
@@ -14,331 +13,200 @@ class ServiceScreen extends StatefulWidget {
 class _ServiceScreenState extends State<ServiceScreen> {
   String? selectedArea;
   String? selectedBranch;
+  String? selectedFilter; // To keep track of the selected filter criterion
 
-  final TextEditingController areaSearchController = TextEditingController();
-  final TextEditingController branchSearchController = TextEditingController();
+  final TextEditingController searchController = TextEditingController(); // Unified search controller
 
   @override
   void dispose() {
-    areaSearchController.dispose();
-    branchSearchController.dispose();
+    searchController.dispose(); // Dispose of the search controller
     super.dispose();
   }
 
   List<Map<String, dynamic>> services = [
-    {"name": "Service 1", "area": "Area 1", "branch": "Branch 1", "date": DateTime.now(), "address": "Address 1"},
-    {"name": "Service 1", "area": "Area 1", "branch": "Branch 2", "date": DateTime.now(), "address": "Address 2"},
-    {"name": "Service 1", "area": "Area 1", "branch": "Branch 3", "date": DateTime.now(), "address": "Address 3"},
-    {"name": "Service 2", "area": "Area 1", "branch": "Branch 1", "date": DateTime.now(), "address": "Address 1"},
-    {"name": "Service 2", "area": "Area 2", "branch": "Branch 1", "date": DateTime.now(), "address": "Address 2"},
-    {"name": "Service 2", "area": "Area 3", "branch": "Branch 1", "date": DateTime.now(), "address": "Address 3"},
-    {"name": "Service 1", "area": "Area 2", "branch": "Branch 1", "date": DateTime.now(), "address": "Address 1"},
-    {"name": "Service 1", "area": "Area 3", "branch": "Branch 1", "date": DateTime.now(), "address": "Address 2"},
-    {"name": "Service 3", "area": "Area 1", "branch": "Branch 1", "date": DateTime.now(), "address": "Address 3"},
+    {"Customer name": "Ali shaker", "area": "Tanta", "branch": "Elastad", "date": DateTime.now(), "address": "21 osman street with sead "},
+    {"Customer name": "Youssef shaker", "area": "cairo", "branch": "Maadi", "date": DateTime.now(), "address": "21 osman street with sead "},
+    {"Customer name": "Ali shaker", "area": "Tanta", "branch": "Elastad", "date": DateTime.now(), "address": "21 osman street with sead "},
+    {"Customer name": "Rodina Elgayar", "area": "Alex", "branch": "Smouha", "date": DateTime.now(), "address": "21 osman street with sead "},
+    {"Customer name": "Mai mohammed", "area": "Tanta", "branch": "Elastad", "date": DateTime.now(), "address": "21 osman street with sead "},
+    {"Customer name": "Farah shaker", "area": "Tanta", "branch": "Elastad", "date": DateTime.now(), "address": "21 osman street with sead "},
+    {"Customer name": "Mai mohammed", "area": "Tanta", "branch": "Elastad", "date": DateTime.now(), "address": "21 osman street with sead "},
+    {"Customer name": "Habiba Ahmed", "area": "Cairo", "branch": "Maadi", "date": DateTime.now(), "address": "21 osman street with sead "},
+    {"Customer name": "Zeina hesham", "area": "Cairo", "branch": "Maadi", "date": DateTime.now(), "address": "21 osman street with sead "},
+    {"Customer name": "Zeina hesham", "area": "Cairo", "branch": "Maadi", "date": DateTime.now(), "address": "21 osman street with sead "},
+    {"Customer name": "Ahmed shaker", "area": "Alex", "branch": "Smouha", "date": DateTime.now(), "address": "21 osman street with sead "},
+    {"Customer name": "Mohammed shaker", "area": "Cairo", "branch": "Maadi", "date": DateTime.now(), "address": "21 osman street with sead "},
   ];
 
-  List<String> areas = ['Area 1', 'Area 2', 'Area 3'];
-  List<String> branches = ['Branch 1', 'Branch 2', 'Branch 3'];
+  List<String> areas = ['Tanta', 'cairo', 'Alex'];
+  List<String> branches = ['Elastad', 'Maadi', 'Smouha'];
+
+  final formKey = GlobalKey<FormState>();
 
   List<Map<String, dynamic>> get filteredServices {
     return services.where((service) {
-      bool matchArea = selectedArea == null || service['area'] == selectedArea;
-      bool matchBranch = selectedBranch == null || service['branch'] == selectedBranch;
-      return matchArea && matchBranch;
+      bool matchArea = (selectedArea == null || service['area'] == selectedArea);
+      bool matchBranch = (selectedBranch == null || service['branch'] == selectedBranch);
+
+      bool matchSearch = searchController.text.isEmpty ||
+          (selectedFilter == 'Area'
+              ? service['area'].toLowerCase().contains(searchController.text.toLowerCase())
+              : selectedFilter == 'Branch'
+              ? service['branch'].toLowerCase().contains(searchController.text.toLowerCase())
+              : selectedFilter == 'Customer Name'
+              ? service['Customer name'].toLowerCase().contains(searchController.text.toLowerCase())
+              : false);
+
+      // Ensure that the service matches both area/branch and search term.
+      return (selectedFilter == 'Area' && selectedArea != null
+          ? matchArea
+          : selectedFilter == 'Branch' && selectedBranch != null
+          ? matchBranch
+          : selectedFilter == 'Customer Name'
+          ? matchSearch
+          : matchArea && matchBranch) && matchSearch;
     }).toList();
   }
 
-  void clearFilters() {
-    setState(() {
-      selectedArea = null;
-      selectedBranch = null;
-      areaSearchController.clear();
-      branchSearchController.clear();
-    });
-  }
 
-  void clearAreaFilter() {
-    setState(() {
-      selectedArea = null;
-      areaSearchController.clear();
-    });
-  }
-
-  void clearBranchFilter() {
-    setState(() {
-      selectedBranch = null;
-      branchSearchController.clear();
-    });
+  void _showDropdownMenu(BuildContext context, List<String> items, ValueChanged<String?> onSelected) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height * .2,
+          child: ListView(
+            children: items.map((String item) {
+              return ListTile(
+                title: Text(item),
+                onTap: () {
+                  onSelected(item);
+                  Navigator.pop(context); // Close the bottom sheet
+                },
+              );
+            }).toList(),
+          ),
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Image.asset(
-          "assets/images/background 2.png",
-          height: MediaQuery.of(context).size.height,
-          width: MediaQuery.of(context).size.width,
-          fit: BoxFit.cover,
-        ),
-        Scaffold(
-          appBar: AppBar(
-            leading: Image(image: AssetImage("assets/images/taqaf 1 (3).png")),
-            actions: [
-              Padding(
-                padding: const EdgeInsets.only(right: 30.0),
-                child: InkWell(
-                    onTap: (){
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => LoginScreen()),
-                      );
-                    },
-                    child: Icon(Icons.logout, size: 30)),
-              ),
-            ],
-            backgroundColor: Colors.transparent,
-            elevation: 0,
+    return Form(
+      key: formKey,
+      child: Stack(
+        children: [
+          Image.asset(
+            "assets/images/background 2.png",
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
+            fit: BoxFit.cover,
           ),
-          backgroundColor: Colors.transparent,
-          body: Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Column(
-              children: [
-                // Area Dropdown
-                DropdownButtonHideUnderline(
-                  child: DropdownButton2<String>(
-                    isExpanded: true,
-                    hint: Text(
-                      'Select Area',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Theme.of(context).hintColor,
-                      ),
-                    ),
-                    items: [
-                      DropdownMenuItem<String>(
-                        value: null,
-                        child: Row(
-                          children: [
-                            Icon(Icons.cleaning_services_rounded, color: Colors.black),
-                            SizedBox(width: 8),
-                          ],
-                        ),
-                        onTap: clearAreaFilter,
-                      ),
-                      ...areas
-                          .where((area) => area.toLowerCase().contains(areaSearchController.text.toLowerCase()))
-                          .map((item) => DropdownMenuItem<String>(
-                        value: item,
-                        child: Text(
-                          item,
-                          style: const TextStyle(
-                            fontSize: 14,
-                          ),
-                        ),
-                      ))
-                          .toList(),
-                    ],
-                    value: selectedArea,
-                    onChanged: (value) {
-                      setState(() {
-                        selectedArea = value;
-                      });
-                    },
-                    buttonStyleData: ButtonStyleData(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      height: MediaQuery.of(context).size.height * 0.05,
-                      width: MediaQuery.of(context).size.width * 0.5,
-                      decoration: BoxDecoration(
-                        color: color2,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    dropdownStyleData: const DropdownStyleData(
-                      maxHeight: 200,
-                    ),
-                    menuItemStyleData: const MenuItemStyleData(
-                      height: 40,
-                    ),
-                    dropdownSearchData: DropdownSearchData(
-                      searchController: areaSearchController,
-                      searchInnerWidgetHeight: 50,
-                      searchInnerWidget: Container(
-                        height: 50,
-                        padding: const EdgeInsets.only(
-                          top: 8,
-                          bottom: 4,
-                          right: 8,
-                          left: 8,
-                        ),
-                        child: TextFormField(
-                          expands: true,
-                          maxLines: null,
-                          controller: areaSearchController,
-                          decoration: InputDecoration(
-                            isDense: true,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 8,
-                            ),
-                            hintText: 'Search for an area...',
-                            hintStyle: const TextStyle(fontSize: 12),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                        ),
-                      ),
-                      searchMatchFn: (item, searchValue) {
-                        return item.value.toString().toLowerCase().contains(searchValue.toLowerCase());
+          Scaffold(
+            appBar: AppBar(
+              leading: Image(image: AssetImage("assets/images/taqaf 1 (3).png")),
+              actions: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 30.0),
+                  child: InkWell(
+                      onTap: (){
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => LoginScreen()),
+                        );
                       },
-                    ),
-                    onMenuStateChange: (isOpen) {
-                      if (!isOpen) {
-                        areaSearchController.clear();
-                      }
-                    },
-                  ),
-                ),
-                SizedBox(height: 10),
-                // Branch Dropdown
-                DropdownButtonHideUnderline(
-                  child: DropdownButton2<String>(
-                    isExpanded: true,
-                    hint: Text(
-                      'Select Branch',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Theme.of(context).hintColor,
-                      ),
-                    ),
-                    items: [
-                      DropdownMenuItem<String>(
-                        value: null,
-                        child: Row(
-                          children: [
-                            Icon(Icons.cleaning_services_rounded, color: Colors.black),
-                            SizedBox(width: 8),
-                          ],
-                        ),
-                        onTap: clearBranchFilter,
-                      ),
-                      ...branches
-                          .where((branch) => branch.toLowerCase().contains(branchSearchController.text.toLowerCase()))
-                          .map((item) => DropdownMenuItem<String>(
-                        value: item,
-                        child: Text(
-                          item,
-                          style: const TextStyle(
-                            fontSize: 14,
-                          ),
-                        ),
-                      ))
-                          .toList(),
-                    ],
-                    value: selectedBranch,
-                    onChanged: (value) {
-                      setState(() {
-                        selectedBranch = value;
-                      });
-                    },
-                    buttonStyleData: ButtonStyleData(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      height: MediaQuery.of(context).size.height * 0.05,
-                      width: MediaQuery.of(context).size.width * 0.5,
-                      decoration: BoxDecoration(
-                        color: color2,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    dropdownStyleData: const DropdownStyleData(
-                      maxHeight: 200,
-                    ),
-                    menuItemStyleData: const MenuItemStyleData(
-                      height: 40,
-                    ),
-                    dropdownSearchData: DropdownSearchData(
-                      searchController: branchSearchController,
-                      searchInnerWidgetHeight: 50,
-                      searchInnerWidget: Container(
-                        height: 50,
-                        padding: const EdgeInsets.only(
-                          top: 8,
-                          bottom: 4,
-                          right: 8,
-                          left: 8,
-                        ),
-                        child: TextFormField(
-                          expands: true,
-                          maxLines: null,
-                          controller: branchSearchController,
-                          decoration: InputDecoration(
-                            isDense: true,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 8,
-                            ),
-                            hintText: 'Search for a branch...',
-                            hintStyle: const TextStyle(fontSize: 12),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                        ),
-                      ),
-                      searchMatchFn: (item, searchValue) {
-                        return item.value.toString().toLowerCase().contains(searchValue.toLowerCase());
-                      },
-                    ),
-                    onMenuStateChange: (isOpen) {
-                      if (!isOpen) {
-                        branchSearchController.clear();
-                      }
-                    },
-                  ),
-                ),
-                SizedBox(height: 10),
-                // Buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                      onPressed: clearFilters,
-                      child: Text('Clear All Filters'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red, // Change this to your desired color
-                        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                        textStyle: TextStyle(fontSize: 14),
-                      ),
-                    ),
-                    SizedBox(width: 10),
-                    // ElevatedButton(
-                    //   onPressed: submitFilters,
-                    //   child: Text('Apply Filters'),
-                    //   style: ElevatedButton.styleFrom(
-                    //     backgroundColor: Colors.blue, // Change this to your desired color
-                    //     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                    //     textStyle: TextStyle(fontSize: 14),
-                    //   ),
-                    // ),
-                  ],
-                ),
-                SizedBox(height: 10),
-                Expanded(
-                  child: ListView.separated(
-                    physics: BouncingScrollPhysics(),
-                    itemBuilder: (context, index) => buildContainerService(
-                        context, filteredServices[index]),
-                    itemCount: filteredServices.length,
-                    separatorBuilder: (context, index) => SizedBox(height: 20),
-                  ),
+                      child: Icon(Icons.logout, size: 30)),
                 ),
               ],
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+            ),
+            backgroundColor: Colors.transparent,
+            body: Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Column(
+                children: [
+                  defaultTextFormDecorated(
+                    controller: searchController,
+                    label: '${selectedFilter ?? "Search"}',
+                    hintText: "Search ${selectedFilter ?? ''}...",
+                    type: TextInputType.text,
+                    onSubmit: (value) {
+                      setState(() {}); // Trigger filter when submitting search
+                    },
+                    validate: (value) {},
+                    onChange: (value) {
+                      setState(() {}); // Trigger filter when typing
+                    },
+                    suffixPressed: () {
+                      // Optionally, clear the search input
+                      searchController.clear();
+                      setState(() {}); // Clear search and trigger filtering
+                    },
+                    suffixicon: Icons.search,
+                    prefixicon: Icons.menu,
+                    prefixPressed: () => _showDropdownMenu(
+                      context,
+                      ['Area', 'Branch', 'Customer Name'], // Dropdown items
+                          (String? selected) {
+                        setState(() {
+                          selectedFilter = selected;
+                          searchController.text = ''; // Clear the search text
+                          if (selected == 'Area') {
+                            Navigator.pop(context); // Close the filter dropdown menu
+                            _showDropdownMenu(
+                              context,
+                              areas,
+                                  (String? area) {
+                                setState(() {
+                                  selectedArea = area;
+                                  selectedBranch = null; // Clear branch selection when selecting area
+                                });
+                              },
+                            );
+                          } else if (selected == 'Branch') {
+                            Navigator.pop(context); // Close the filter dropdown menu
+                            _showDropdownMenu(
+                              context,
+                              branches,
+                                  (String? branch) {
+                                setState(() {
+                                  selectedBranch = branch;
+                                  selectedArea = null; // Clear area selection when selecting branch
+                                });
+                              },
+                            );
+                          } else if (selected == 'Customer Name') {
+                            selectedArea = null; // Clear area selection
+                            selectedBranch = null; // Clear branch selection
+                          }
+                        });
+                      },
+                    ),
+                  ),
+                  SizedBox(height: 30),
+                  Expanded(
+                    child: InkWell(
+                      onTap: (){
+                        Navigator.push(context, MaterialPageRoute(builder: (context)=>ServiceDetail()));
+                      },
+                      child: ListView.separated(
+                        physics: BouncingScrollPhysics(),
+                        itemBuilder: (context, index) => buildContainerService(
+                            context, filteredServices[index]),
+                        itemCount: filteredServices.length,
+                        separatorBuilder: (context, index) => SizedBox(height: 20),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -359,7 +227,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                FittedBox(fit: BoxFit.scaleDown, child: Text(service['name'] ?? '')),
+                FittedBox(fit: BoxFit.scaleDown, child: Text(service['Customer name'] ?? '')),
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 0.077,
                 ),
@@ -371,7 +239,7 @@ class _ServiceScreenState extends State<ServiceScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                FittedBox(child: Text(service['name'] ?? ''), fit: BoxFit.scaleDown),
+                FittedBox(child: Text(service['Customer name'] ?? ''), fit: BoxFit.scaleDown),
                 SizedBox(height: 20),
                 FittedBox(fit: BoxFit.scaleDown, child: Text(service['date'].toLocal().toString())),
                 FittedBox(

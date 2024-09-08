@@ -1,6 +1,7 @@
-import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:taqa_epc/Shared/Component/Components.dart';
+import 'package:taqa_epc/Shared/Constant/Colors/Color.dart';
+import 'package:taqa_epc/modules/Services/Services.dart';
 
 class ServiceDetail extends StatefulWidget {
   const ServiceDetail({super.key});
@@ -10,110 +11,193 @@ class ServiceDetail extends StatefulWidget {
 }
 
 class _ServiceDetailState extends State<ServiceDetail> {
-  final List<String> items = [
-    'A_Item1',
-    'A_Item2',
-    'A_Item3',
-    'A_Item4',
-    'B_Item1',
-    'B_Item2',
-    'B_Item3',
-    'B_Item4',
-  ];
+  bool _isStarted = false; // State variable to manage start state
+  bool _isCompleted = false; // State variable to manage checkbox state
+  bool _isEnd = false; // State variable to manage end state
+  bool _isCheckboxEnabled = false; // State variable to manage checkbox clickability
+  bool _isSaveEnabled = false; // State variable to manage save button clickability
 
-  String? selectedValue;
-  final TextEditingController textEditingController = TextEditingController();
-
-  @override
-  void dispose() {
-    textEditingController.dispose();
-    super.dispose();
-  }
+  var noteController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: DropdownButtonHideUnderline(
-          child: DropdownButton2<String>(
-            isExpanded: true,
-            hint: Text(
-              'Select Item',
-              style: TextStyle(
-                fontSize: 14,
-                color: Theme.of(context).hintColor,
-              ),
+      appBar: AppBar(
+        title: Center(
+          child: Text("Service Name Details"),
+        ),
+        backgroundColor: Colors.transparent,
+      ),
+      backgroundColor: Color.lerp(color1, color2, 1),
+      body: Padding(
+        padding: const EdgeInsets.all(15.0),
+        child: SingleChildScrollView(
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              color: Colors.transparent,
             ),
-            items: items
-                .map((item) => DropdownMenuItem(
-              value: item,
-              child: Text(
-                item,
-                style: const TextStyle(
-                  fontSize: 14,
-                ),
-              ),
-            ))
-                .toList(),
-            value: selectedValue,
-            onChanged: (value) {
-              setState(() {
-                selectedValue = value;
-              });
-            },
-            buttonStyleData: const ButtonStyleData(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              height: 40,
-              width: 200,
-            ),
-            dropdownStyleData: const DropdownStyleData(
-              maxHeight: 200,
-            ),
-            menuItemStyleData: const MenuItemStyleData(
-              height: 40,
-            ),
-            dropdownSearchData: DropdownSearchData(
-              searchController: textEditingController,
-              searchInnerWidgetHeight: 50,
-              searchInnerWidget: Container(
-                height: 50,
-                padding: const EdgeInsets.only(
-                  top: 8,
-                  bottom: 4,
-                  right: 8,
-                  left: 8,
-                ),
-                child: TextFormField(
-                  expands: true,
-                  maxLines: null,
-                  controller: textEditingController,
-                  decoration: InputDecoration(
-                    isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 8,
+            width: MediaQuery.of(context).size.width * 1.7,
+            height: MediaQuery.of(context).size.height,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildCard("Customer:", "Youssef shaker"),
+                _buildCard("Mobile:", "01009667936"),
+                _buildCard("TAQAID:", "123"),
+                _buildCard("CRN:", "34576272"),
+                _buildCard("Branch:", "Elastad"),
+                _buildCard("Area:", "Tanta"),
+                _buildCard("Service:", "Service 1"),
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: !_isStarted ? _startService : null,
+                      child: Text("Start"),
+                      // Removed color logic
                     ),
-                    hintText: 'Search for an item...',
-                    hintStyle: const TextStyle(fontSize: 12),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
+                    SizedBox(width: 6),
+                    ElevatedButton(
+                      onPressed: (_isStarted && _isCompleted && !_isEnd) ? _endService : null,
+                      child: Text("End"),
+                      // Removed color logic
                     ),
-                  ),
+                    SizedBox(width: 6),
+                    Checkbox(
+                      value: _isCompleted,
+                      onChanged: _isStarted && !_isEnd
+                          ? (value) {
+                        setState(() {
+                          _isCompleted = value ?? false;
+                          // Enable or disable the End button based on checkbox state
+                          if (_isCompleted) {
+                            _isCheckboxEnabled = true;
+                          } else {
+                            _isCheckboxEnabled = false;
+                          }
+                        });
+                      }
+                          : null,
+                    ),
+                    Text(
+                      "Is Completed",
+                      style: TextStyle(fontSize: 15),
+                    ),
+                  ],
                 ),
-              ),
-              searchMatchFn: (item, searchValue) {
-                return item.value.toString().contains(searchValue);
-              },
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Note",
+                      style: TextStyle(fontSize: 18),
+                    ),
+                    SizedBox(width: 10),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * .7,
+                      child: defaultTextFormDecorated(
+                        fillColor: Colors.grey,
+                        controller: noteController,
+                        label: "",
+                        hintText: "",
+                        type: TextInputType.text,
+                        onSubmit: (value) {},
+                        validate: (value) {},
+                        onChange: (value) {},
+                        suffixPressed: () {},
+                        suffixicon: Icons.note_alt_sharp,
+                        prefixPressed: () {},
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton(
+                      onPressed: _isSaveEnabled ? _save : null,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Icon(Icons.save_outlined, color: Colors.green),
+                          Text("Save"),
+                        ],
+                      ),
+                      // Removed color logic
+                    ),
+                    SizedBox(width: 6),
+                    ElevatedButton(
+                      onPressed: _cancel,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Icon(Icons.cancel_outlined, color: Colors.green),
+                          Text("Cancel"),
+                        ],
+                      ),
+                      // Removed color logic
+                    ),
+                  ],
+                ),
+              ],
             ),
-            //This to clear the search value when you close the menu
-            onMenuStateChange: (isOpen) {
-              if (!isOpen) {
-                textEditingController.clear();
-              }
-            },
           ),
         ),
       ),
     );
+  }
+
+  Widget _buildCard(String text, String text2) {
+    return Card(
+      margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 15.0),
+      color: Color.lerp(color1, color2, 1.8),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          children: [
+            Text(
+              text,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(width: 20),
+            Text(
+              text2,
+              style: TextStyle(fontSize: 18),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _startService() {
+    setState(() {
+      _isStarted = true;
+      _isCheckboxEnabled = false; // Disable the checkbox initially
+      _isSaveEnabled = false; // Disable Save button initially
+    });
+  }
+
+  void _endService() {
+    setState(() {
+      _isEnd = true;
+      _isCheckboxEnabled = false; // Disable the checkbox
+      _isSaveEnabled = true; // Enable Save button
+    });
+  }
+
+  void _save() {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => ServiceScreen()));
+  }
+
+  void _cancel() {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => ServiceScreen()));
   }
 }

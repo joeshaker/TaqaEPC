@@ -45,7 +45,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Image(image: AssetImage("assets/images/taqaf 1.png")),
+                      Image(
+                          image:
+                          AssetImage("assets/images/taqaf 1.png"),
+                      width: MediaQuery.of(context).size.width*.7,),
                       SizedBox(height: 40),
                       Stack(
                         children: [
