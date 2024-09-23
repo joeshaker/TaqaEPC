@@ -23,7 +23,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Center(
+        title: const Center(
           child: Text("Service Name Details"),
         ),
         backgroundColor: Colors.transparent,
@@ -49,22 +49,22 @@ class _ServiceDetailState extends State<ServiceDetail> {
                 _buildCard("Branch:", "Elastad"),
                 _buildCard("Area:", "Tanta"),
                 _buildCard("Service:", "Service 1"),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     ElevatedButton(
                       onPressed: !_isStarted ? _startService : null,
-                      child: Text("Start"),
+                      child: const Text("Start"),
                       // Removed color logic
                     ),
-                    SizedBox(width: 6),
+                    const SizedBox(width: 6),
                     ElevatedButton(
                       onPressed: (_isStarted && _isCompleted && !_isEnd) ? _endService : null,
-                      child: Text("End"),
+                      child: const Text("End"),
                       // Removed color logic
                     ),
-                    SizedBox(width: 6),
+                    const SizedBox(width: 6),
                     Checkbox(
                       value: _isCompleted,
                       onChanged: _isStarted && !_isEnd
@@ -81,21 +81,21 @@ class _ServiceDetailState extends State<ServiceDetail> {
                       }
                           : null,
                     ),
-                    Text(
+                    const Text(
                       "Is Completed",
                       style: TextStyle(fontSize: 15),
                     ),
                   ],
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
+                    const Text(
                       "Note",
                       style: TextStyle(fontSize: 18),
                     ),
-                    SizedBox(width: 10),
+                    const SizedBox(width: 10),
                     SizedBox(
                       width: MediaQuery.of(context).size.width * .7,
                       child: defaultTextFormDecorated(
@@ -114,13 +114,13 @@ class _ServiceDetailState extends State<ServiceDetail> {
                     ),
                   ],
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     ElevatedButton(
                       onPressed: _isSaveEnabled ? _save : null,
-                      child: Row(
+                      child: const Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           Icon(Icons.save_outlined, color: Colors.green),
@@ -129,10 +129,10 @@ class _ServiceDetailState extends State<ServiceDetail> {
                       ),
                       // Removed color logic
                     ),
-                    SizedBox(width: 6),
+                    const SizedBox(width: 6),
                     ElevatedButton(
                       onPressed: _cancel,
-                      child: Row(
+                      child: const Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Icon(Icons.cancel_outlined, color: Colors.green),
@@ -153,7 +153,7 @@ class _ServiceDetailState extends State<ServiceDetail> {
 
   Widget _buildCard(String text, String text2) {
     return Card(
-      margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 15.0),
+      margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 15.0),
       color: Color.lerp(color1, color2, 1.8),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -161,15 +161,15 @@ class _ServiceDetailState extends State<ServiceDetail> {
           children: [
             Text(
               text,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(width: 20),
+            const SizedBox(width: 20),
             Text(
               text2,
-              style: TextStyle(fontSize: 18),
+              style: const TextStyle(fontSize: 18),
             ),
           ],
         ),
@@ -194,10 +194,10 @@ class _ServiceDetailState extends State<ServiceDetail> {
   }
 
   void _save() {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => ServiceScreen()));
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const ServiceScreen()));
   }
 
   void _cancel() {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => ServiceScreen()));
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const ServiceScreen()));
   }
 }

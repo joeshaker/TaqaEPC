@@ -41,6 +41,14 @@ dependencies:
   flutter_form_builder: ^9.4.1
   dropdown_button2: ^2.3.9
   responsive_card: ^0.0.4
+  flutter_launcher_icons: ^0.13.1
+  shared_preferences: ^2.3.2
+  conditional_builder_rec: ^1.0.0
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/logotaqa.png"
 
 dev_dependencies:
   flutter_test:

@@ -1,5 +1,8 @@
+import 'package:conditional_builder_rec/conditional_builder_rec.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:taqa_epc/Shared/Constant/Colors/Color.dart';
+import 'package:taqa_epc/modules/Login/Cubit/login_cubit.dart';
 import 'package:taqa_epc/modules/Services/Services.dart';
 
 import '../../Shared/Component/Components.dart';
@@ -25,6 +28,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return BlocProvider(
+  create: (context) => LoginCubit(),
+  child: BlocConsumer<LoginCubit, LoginState>(
+  listener: (context, state) {
+    // TODO: implement listener
+  },
+  builder: (context, state) {
     return Stack(
       children: [
         Image.asset(
@@ -47,9 +57,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       Image(
                           image:
-                          AssetImage("assets/images/taqaf 1.png"),
+                          const AssetImage("assets/images/taqaf 1.png"),
                       width: MediaQuery.of(context).size.width*.7,),
-                      SizedBox(height: 40),
+                      const SizedBox(height: 40),
                       Stack(
                         children: [
                           FittedBox(
@@ -79,7 +89,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           )
                         ],
                       ),
-                      SizedBox(height: 30),
+                      const SizedBox(height: 30),
                       defaultTextForm(
                         controller: EmailController,
                         label: "Username",
@@ -104,7 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         suffixPressed: () {},
                         suffixicon: Icons.person,
                       ),
-                      SizedBox(height: 30),
+                      const SizedBox(height: 30),
                       defaultTextForm(
                         controller: PassController,
                         label: "Password",
@@ -113,7 +123,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         isPassword: _obscureText,
                         onSubmit: (value) {
                           if (formKey.currentState!.validate()) {
-                            // Handle submission if needed
+                            LoginCubit.get(context).userLogin(EmailController.text, PassController.text);
                           }
                         },
                         validate: (value) {
@@ -126,7 +136,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         suffixPressed: _togglePasswordVisibility,
                         suffixicon: _obscureText ? Icons.lock : Icons.lock_open_rounded,
                       ),
-                      Row(
+                      const Row(
                         children: [
                           Spacer(),
                           Text(
@@ -138,33 +148,38 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ],
                       ),
-                      SizedBox(height: 30),
-                      SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.3,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            if (formKey.currentState!.validate()) {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => ServiceScreen()),
-                              );
-                            }
-                          },
-                          child: Center(
-                            child: Text(
-                              "Login",
-                              style: TextStyle(
-                                color: color1,
+                      const SizedBox(height: 30),
+                      ConditionalBuilderRec(
+                        condition: state is! LoginLoading,
+                        builder: (context)=>SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.3,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              if (formKey.currentState!.validate()) {
+                                LoginCubit.get(context).userLogin(EmailController.text, PassController.text);
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const ServiceScreen()),
+                                );
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Color.lerp(color1, color2, 1),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                            ),
+                            child: const Center(
+                              child: Text(
+                                "Login",
+                                style: TextStyle(
+                                  color: color1,
+                                ),
                               ),
                             ),
                           ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color.lerp(color1, color2, 1),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                          ),
                         ),
+                        fallback:(context)=>Center(child: CircularProgressIndicator()),
                       ),
                     ],
                   ),
@@ -175,5 +190,8 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ],
     );
+  },
+),
+);
   }
 }
