@@ -44,6 +44,7 @@ dependencies:
   flutter_launcher_icons: ^0.13.1
   shared_preferences: ^2.3.2
   conditional_builder_rec: ^1.0.0
+  fluttertoast: ^8.2.8
 
 flutter_launcher_icons:
   android: "launcher_icon"

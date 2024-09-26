@@ -2,6 +2,8 @@ import 'package:conditional_builder_rec/conditional_builder_rec.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:taqa_epc/Shared/Constant/Colors/Color.dart';
+import 'package:taqa_epc/Shared/Constant/consts.dart';
+import 'package:taqa_epc/Shared/network/local/cache_helper.dart';
 import 'package:taqa_epc/modules/Login/Cubit/login_cubit.dart';
 import 'package:taqa_epc/modules/Services/Services.dart';
 
@@ -16,16 +18,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final EmailController = TextEditingController();
   final PassController = TextEditingController();
   final formKey = GlobalKey<FormState>();
-
-  // State to manage password visibility
-  bool _obscureText = true;
-
-  void _togglePasswordVisibility() {
-    setState(() {
-      _obscureText = !_obscureText;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -33,6 +25,30 @@ class _LoginScreenState extends State<LoginScreen> {
   child: BlocConsumer<LoginCubit, LoginState>(
   listener: (context, state) {
     // TODO: implement listener
+    if(state is LoginSuccess){
+      if (state.loginmodel.status == true) { // Treat "true" as a string
+        print(state.loginmodel.message);
+        print(state.loginmodel.data!.token);
+        ShowToast(text: '${state.loginmodel.message}', state: ToastStates.SUCCESS);
+        CacheHelper.saveData(
+            key: 'token',
+            value: state.loginmodel.data!.token
+        ).then((value) {
+          token = state.loginmodel.data!.token;
+          navigateAndFinish(context, ServiceScreen());
+        }).catchError((error){
+          if(state is LoginError){
+            print(state.loginmodel.message);
+          }
+        });
+      } else {
+        print(state.loginmodel.message);
+        ShowToast(text: '${state.loginmodel.message}', state: ToastStates.ERROR);
+      }
+    }
+    if(state is LoginError){
+      print(state.Error);
+    }
   },
   builder: (context, state) {
     return Stack(
@@ -104,11 +120,11 @@ class _LoginScreenState extends State<LoginScreen> {
                           if (value!.isEmpty) {
                             return "Username should not be empty";
                           }
-                          final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
-                          if (!emailRegex.hasMatch(value)) {
-                            return "Enter a valid email address";
-                          }
-                          return null;
+                          // final emailRegex = RegExp(r'^[^@]+@[^@]+\.[^@]+$');
+                          // if (!emailRegex.hasMatch(value)) {
+                          //   return "Enter a valid email address";
+                          // }
+                          // return null;
                         },
                         onChange: (value) {},
                         suffixPressed: () {},
@@ -120,7 +136,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         label: "Password",
                         hintText: "Enter your Password",
                         type: TextInputType.visiblePassword,
-                        isPassword: _obscureText,
+                        isPassword: LoginCubit.get(context).isPassword,
                         onSubmit: (value) {
                           if (formKey.currentState!.validate()) {
                             LoginCubit.get(context).userLogin(EmailController.text, PassController.text);
@@ -133,8 +149,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           return null;
                         },
                         onChange: (value) {},
-                        suffixPressed: _togglePasswordVisibility,
-                        suffixicon: _obscureText ? Icons.lock : Icons.lock_open_rounded,
+                        suffixPressed: LoginCubit.get(context).ChangeVisiblity,
+                        suffixicon: LoginCubit.get(context).sufixx,
                       ),
                       const Row(
                         children: [
@@ -157,10 +173,13 @@ class _LoginScreenState extends State<LoginScreen> {
                             onPressed: () {
                               if (formKey.currentState!.validate()) {
                                 LoginCubit.get(context).userLogin(EmailController.text, PassController.text);
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => const ServiceScreen()),
-                                );
+                                // if(token!=null){
+                                //   navigateAndFinish(context, ServiceScreen());
+                                // }
+                                // Navigator.push(
+                                //   context,
+                                //   MaterialPageRoute(builder: (context) => const ServiceScreen()),
+                                // );
                               }
                             },
                             style: ElevatedButton.styleFrom(

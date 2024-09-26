@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:taqa_epc/Shared/Component/Components.dart';
 import 'package:taqa_epc/Shared/Constant/Colors/Color.dart';
+import 'package:taqa_epc/Shared/network/local/cache_helper.dart';
+import 'package:taqa_epc/modules/Login/Cubit/login_cubit.dart';
 import 'package:taqa_epc/modules/Login/LoginScreen.dart';
 import 'package:taqa_epc/modules/ServiceDetails/ServiceDetail.dart';
 
@@ -94,120 +97,129 @@ class _ServiceScreenState extends State<ServiceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: formKey,
-      child: Stack(
-        children: [
-          Image.asset(
-            "assets/images/background 2.png",
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
-            fit: BoxFit.cover,
-          ),
-          Scaffold(
-            appBar: AppBar(
-              leading: Image(image: AssetImage("assets/images/taqaf 1 (3).png")),
-              actions: [
-                Padding(
-                  padding: const EdgeInsets.only(right: 30.0),
-                  child: InkWell(
-                      onTap: (){
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => LoginScreen()),
-                        );
-                      },
-                      child: Icon(Icons.logout, size: 30)),
-                ),
-              ],
-              backgroundColor: Colors.transparent,
-              elevation: 0,
+      return Form(
+        key: formKey,
+        child: Stack(
+          children: [
+            Image.asset(
+              "assets/images/background 2.png",
+              height: MediaQuery.of(context).size.height,
+              width: MediaQuery.of(context).size.width,
+              fit: BoxFit.cover,
             ),
-            backgroundColor: Colors.transparent,
-            body: Padding(
-              padding: const EdgeInsets.all(10.0),
-              child: Column(
-                children: [
-                  defaultTextFormDecorated(
-                    controller: searchController,
-                    label: '${selectedFilter ?? "Search"}',
-                    hintText: "Search ${selectedFilter ?? ''}...",
-                    type: TextInputType.text,
-                    onSubmit: (value) {
-                      setState(() {}); // Trigger filter when submitting search
-                    },
-                    validate: (value) {},
-                    onChange: (value) {
-                      setState(() {}); // Trigger filter when typing
-                    },
-                    suffixPressed: () {
-                      // Optionally, clear the search input
-                      searchController.clear();
-                      setState(() {}); // Clear search and trigger filtering
-                    },
-                    suffixicon: Icons.search,
-                    prefixicon: Icons.menu,
-                    prefixPressed: () => _showDropdownMenu(
-                      context,
-                      ['Area', 'Branch', 'Customer Name'], // Dropdown items
-                          (String? selected) {
-                        setState(() {
-                          selectedFilter = selected;
-                          searchController.text = ''; // Clear the search text
-                          if (selected == 'Area') {
-                            Navigator.pop(context); // Close the filter dropdown menu
-                            _showDropdownMenu(
-                              context,
-                              areas,
-                                  (String? area) {
-                                setState(() {
-                                  selectedArea = area;
-                                  selectedBranch = null; // Clear branch selection when selecting area
-                                });
-                              },
-                            );
-                          } else if (selected == 'Branch') {
-                            Navigator.pop(context); // Close the filter dropdown menu
-                            _showDropdownMenu(
-                              context,
-                              branches,
-                                  (String? branch) {
-                                setState(() {
-                                  selectedBranch = branch;
-                                  selectedArea = null; // Clear area selection when selecting branch
-                                });
-                              },
-                            );
-                          } else if (selected == 'Customer Name') {
-                            selectedArea = null; // Clear area selection
-                            selectedBranch = null; // Clear branch selection
-                          }
-                        });
-                      },
-                    ),
-                  ),
-                  SizedBox(height: 30),
-                  Expanded(
+            Scaffold(
+              appBar: AppBar(
+                leading: Image(image: AssetImage("assets/images/taqaf 1 (3).png")),
+                actions: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 30.0),
                     child: InkWell(
-                      onTap: (){
-                        Navigator.push(context, MaterialPageRoute(builder: (context)=>ServiceDetail()));
-                      },
-                      child: ListView.separated(
-                        physics: BouncingScrollPhysics(),
-                        itemBuilder: (context, index) => buildContainerService(
-                            context, filteredServices[index]),
-                        itemCount: filteredServices.length,
-                        separatorBuilder: (context, index) => SizedBox(height: 20),
-                      ),
-                    ),
+                        onTap: (){
+                          CacheHelper.clearData(key: 'token').then((value){
+                            if(value==true){
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (context) => LoginScreen()),
+                              );
+
+                            }
+                          });
+                          // Navigator.push(
+                          //   context,
+                          //   MaterialPageRoute(builder: (context) => LoginScreen()),
+                          // );
+                        },
+                        child: Icon(Icons.logout, size: 30)),
                   ),
                 ],
+                backgroundColor: Colors.transparent,
+                elevation: 0,
+              ),
+              backgroundColor: Colors.transparent,
+              body: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Column(
+                  children: [
+                    defaultTextFormDecorated(
+                      controller: searchController,
+                      label: '${selectedFilter ?? "Search"}',
+                      hintText: "Search ${selectedFilter ?? ''}...",
+                      type: TextInputType.text,
+                      onSubmit: (value) {
+                        setState(() {}); // Trigger filter when submitting search
+                      },
+                      validate: (value) {},
+                      onChange: (value) {
+                        setState(() {}); // Trigger filter when typing
+                      },
+                      suffixPressed: () {
+                        // Optionally, clear the search input
+                        searchController.clear();
+                        setState(() {}); // Clear search and trigger filtering
+                      },
+                      suffixicon: Icons.search,
+                      prefixicon: Icons.menu,
+                      prefixPressed: () => _showDropdownMenu(
+                        context,
+                        ['Area', 'Branch', 'Customer Name'], // Dropdown items
+                            (String? selected) {
+                          setState(() {
+                            selectedFilter = selected;
+                            searchController.text = ''; // Clear the search text
+                            if (selected == 'Area') {
+                              Navigator.pop(context); // Close the filter dropdown menu
+                              _showDropdownMenu(
+                                context,
+                                areas,
+                                    (String? area) {
+                                  setState(() {
+                                    selectedArea = area;
+                                    selectedBranch = null; // Clear branch selection when selecting area
+                                  });
+                                },
+                              );
+                            } else if (selected == 'Branch') {
+                              Navigator.pop(context); // Close the filter dropdown menu
+                              _showDropdownMenu(
+                                context,
+                                branches,
+                                    (String? branch) {
+                                  setState(() {
+                                    selectedBranch = branch;
+                                    selectedArea = null; // Clear area selection when selecting branch
+                                  });
+                                },
+                              );
+                            } else if (selected == 'Customer Name') {
+                              selectedArea = null; // Clear area selection
+                              selectedBranch = null; // Clear branch selection
+                            }
+                          });
+                        },
+                      ),
+                    ),
+                    SizedBox(height: 30),
+                    Expanded(
+                      child: InkWell(
+                        onTap: (){
+                          Navigator.push(context, MaterialPageRoute(builder: (context)=>ServiceDetail()));
+                        },
+                        child: ListView.separated(
+                          physics: BouncingScrollPhysics(),
+                          itemBuilder: (context, index) => buildContainerService(
+                              context, filteredServices[index]),
+                          itemCount: filteredServices.length,
+                          separatorBuilder: (context, index) => SizedBox(height: 20),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
   }
 
   Widget buildContainerService(BuildContext context, Map<String, dynamic> service) {
